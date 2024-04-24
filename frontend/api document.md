@@ -111,6 +111,7 @@ This document provides detailed information on the APIs available in the Plant M
 **Parameters:**
 
 - `plantId` (integer): The ID of the plant.
+- `dataType` (string): The type of data requested (e.g., 'humidity', 'temperature').
 
 
 **Response Example:**
