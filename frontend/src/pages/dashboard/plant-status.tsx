@@ -2,21 +2,26 @@ import React from 'react';
 import styled from 'styled-components';
 import Chart from "react-apexcharts";
 import { ToolFilled } from '@ant-design/icons';
+import { message } from 'antd';
+import _ from 'lodash'
 
-import { Plant } from '../../types/plant';
+import { Plant, PlantAction, PlantType } from '../../types/plant';
 import { getTagByStatus } from './plant-monitor';
 import { Tooltip } from 'antd';
 import FlowerPlaceholderPng from '../../assets/images/flower1.jpeg';
 import plantBPng from '../../assets/images/plantB.webp';
 import plantCPng from '../../assets/images/plantC.jpeg'
+import { takeActionOnPlant } from '../../apis/plant';
 
 interface CircularProgressProps {
   value: number[],
   label: string,
   color: string,
+  activePlant: Plant | null,
 }
 
-const CircularProgress = ({ value, label, color }: CircularProgressProps) => {
+const CircularProgress = ({ value, label, color, activePlant }: CircularProgressProps) => {
+  const [messageApi, contextHolder] = message.useMessage();
   const options = {
     // series: ,
   chart: {
@@ -66,9 +71,6 @@ const CircularProgress = ({ value, label, color }: CircularProgressProps) => {
         value: {
           show: true,
           fontSize: '12px',
-          // formatter: function (val) {
-          //   return val + '%'
-          // }
         },
       }
     },
@@ -77,7 +79,22 @@ const CircularProgress = ({ value, label, color }: CircularProgressProps) => {
   
 }
 
+const triggerAction = async (label: string) => {
+  if(!activePlant) return
+  const type = _.lowerCase(label)
+
+  await takeActionOnPlant(activePlant.plantId, type as PlantAction)
+
+  // messageApi.open({
+  //   type: 'success',
+  //   content: 'Trigger action successfully',
+  // });
+  message.success('Trigger action successfully') 
+}
+
   return (
+    <>
+    {contextHolder}
     <ProgessChartWrapper className='chart-component-wrapper'>
        <Chart
           options={options}
@@ -87,18 +104,26 @@ const CircularProgress = ({ value, label, color }: CircularProgressProps) => {
         />
         <Tooltip title="Take Care">
           <div className='fix-icon-wrapper'>
-            <ToolFilled style={{fontSize: 18, color: '#ff0000b7'}}/>
+            <ToolFilled onClick={() => triggerAction(label)} style={{fontSize: 18, color: '#ff0000b7'}}/>
           </div>
         </Tooltip>
     </ProgessChartWrapper>
+    </>
   );
 };
 
 interface PlantStatus {
-  activePlant: Plant | null
+  activePlant: Plant | null,
+  pieChartData: PieData[],
 }
 
-function PlantStatus({ activePlant }: PlantStatus) {
+export interface PieData {
+  type: PlantType,
+  standardData: number,
+  currentData: number,
+}
+
+function PlantStatus({ activePlant, pieChartData }: PlantStatus) {
 
   const colorSet = ['#3498db', '#f1c40f', '#2ecc71']
 
@@ -124,9 +149,12 @@ function PlantStatus({ activePlant }: PlantStatus) {
       </PlantInfo>
       <StyledImage src={getImageUrl(activePlant?.plantId)}></StyledImage>
       <CircularProgressSection className='circular-progress-section'>
-        <CircularProgress value={[45, 60]} label="Temperate" color={colorSet[0]}/>
-        <CircularProgress value={[70, 75]} label="Humidity" color={colorSet[1]}/>
-        <CircularProgress value={[60, 65]} label="Light" color={colorSet[2]}/>
+        {
+          pieChartData.map(data => <CircularProgress key={data.type} activePlant={activePlant} value={[data.currentData, data.standardData]} label={`${_.capitalize(data.type)}`} color={colorSet[0]}/>)
+        }
+        
+        {/* <CircularProgress value={[70, 75]} label="Humidity" color={colorSet[1]}/>
+        <CircularProgress value={[60, 65]} label="Light" color={colorSet[2]}/> */}
       </CircularProgressSection>
     </Container>
   );

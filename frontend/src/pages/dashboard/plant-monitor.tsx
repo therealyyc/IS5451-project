@@ -8,7 +8,7 @@ import Chart from "react-apexcharts";
 import FlowerPlaceholderPng from '../../assets/images/flower1.jpeg';
 import plantBPng from '../../assets/images/plantB.webp';
 import plantCPng from '../../assets/images/plantC.jpeg'
-import { Plant, PlantStatus } from '../../types/plant';
+import { Plant, PlantLineChart, PlantStatus, PlantType } from '../../types/plant';
 
 const NormalTag = () => (
   <Tag icon={<CheckCircleOutlined />} color="#87d068">
@@ -78,12 +78,13 @@ function MonitorItem ({ plant, onSelectPlant }: MonitorItemProps) {
   )
 }
 
-interface PlantMonitorPros {
-  plants: Plant[],
-  onSelectPlant: ( plant: Plant) => void,
+interface LineChartProps {
+  linedata: PlantLineChart
 }
 
-const LineChart = () => {
+const LineChart = ({
+  linedata
+}: LineChartProps) => {
   const options = {
     chart: {
       height: '100%',
@@ -108,42 +109,38 @@ const LineChart = () => {
       },
     },
     xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+      categories: linedata.categories,
     }
   }
 
-  const mock_data = [
-    {
-      name: "A",
-      data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
-    },
-    {
-      name: "B",
-      data: [20, 31, 15, 31, 69, 22, 39, 61, 28]
-    }
-]
-
   return (<LineChartWrapper>
-    <Chart options={options} series={mock_data} type="line" height={'100%'} />
+    <Chart options={options} series={linedata.value} type="line" height={'100%'} />
   </LineChartWrapper>)
 }
 
+interface PlantMonitorPros {
+  plants: Plant[],
+  linedata: PlantLineChart | null,
+  selectedPlantType: PlantType,
+  onSelectPlant: ( plant: Plant) => void,
+  onSelectLineChart: (plant: PlantType) => void, 
+}
 
-function PlantMonitor({plants, onSelectPlant}: PlantMonitorPros) {
+function PlantMonitor({plants, linedata, onSelectPlant, selectedPlantType, onSelectLineChart}: PlantMonitorPros) {
 
   const typeOptions = [
-    { value: 'light', label: 'Light' },
-    { value: 'humid', label: 'Humid' },
-    { value: 'temperature', label: 'Temperature' },
+    { value: PlantType.LIGHT, label: 'Light' },
+    { value: PlantType.HUMIDITY, label: 'Humid' },
+    { value: PlantType.TEMPERATURE, label: 'Temperature' },
   ]
 
   return (
     <Container>
       <LineChartSection>
         <div className='type-selector'>
-          <Select  className='trend-type-selector' value={typeOptions[0]} options={typeOptions}></Select>
+          <Select className='trend-type-selector' value={selectedPlantType} options={typeOptions} onSelect={(value) => onSelectLineChart(value)}></Select>
         </div>
-        <LineChart/>
+        { linedata &&  <LineChart linedata={linedata}/> }
       </LineChartSection>
       <div className='card-wrapper'>
         <Row gutter={[24, 0]}>
@@ -246,7 +243,7 @@ const LineChartSection = styled.div`
 
   .type-selector {
     position: absolute;
-    z-index: 99999;
+    z-index: 99;
     left: 60px;
     top: -5px;
     .trend-type-selector {

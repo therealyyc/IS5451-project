@@ -1,15 +1,19 @@
 import styled from "styled-components"
 import { useState, useEffect } from 'react'
-import PlantStatus from "./plant-status"
+import PlantStatus, { PieData } from "./plant-status"
 import PlantMonitor from "./plant-monitor"
-import { getPLants } from "../../apis/plant"
-import { Plant } from "../../types/plant"
+import { getPLants, getPlantCondition, getLineChart, getPieChart } from "../../apis/plant"
+import { Plant, PlantLineChart, PlantType } from "../../types/plant"
 
 
 const Dashboard = () => {
-  const [first, setfirst] = useState([])
   const [plants, setPlants] = useState<Plant[]>([])
   const [activePlant, setActivePlant] = useState<Plant | null>(null)
+  const [pieChartData, setPieChartData] = useState<PieData[]>([])
+  const [lineChartData, setLineChartData] = useState<PlantLineChart | null>({ "value": [{ "name": PlantType.LIGHT, "data": [20, 31, 15, 31, 69, 22, 39, 61, 28] }],
+    "categories": ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+ })
+  const [selectedLineCategory, setSelectedLineCategory] = useState<PlantType>(PlantType.LIGHT)
 
   useEffect(() => {
     (async() => {
@@ -19,16 +23,40 @@ const Dashboard = () => {
     })()
   }, [])
 
+  useEffect(() => {
+    (async() => {
+      if(activePlant){
+        // const liePlant = await getLineChart(activePlant.plantId)
+        const piedata = await getPieChart(activePlant.plantId)
+        setPieChartData(piedata)
+      }
+    })()
+  }, [activePlant])
+
+  useEffect(() => {
+    (async() => {
+      if(activePlant){
+        const linedata = await getLineChart(activePlant.plantId, selectedLineCategory)
+        setLineChartData(linedata)
+      }
+    })()
+  }, [activePlant, selectedLineCategory])
+  
+
   const selectPlant = (plant: Plant) => {
     setActivePlant(plant)
+  }
+
+  const selectPlantTypeForLineChart = (plantType: PlantType) => {
+    setSelectedLineCategory(plantType)
   }
   
   return ( <Container>
     <LeftColumn>
-      <PlantStatus activePlant={activePlant}/>
+      <PlantStatus activePlant={activePlant} pieChartData={pieChartData}/>
     </LeftColumn>
     <RightColumn>
-      <PlantMonitor plants={plants} onSelectPlant={selectPlant}/>
+      <PlantMonitor linedata={lineChartData} plants={plants} selectedPlantType={selectedLineCategory} onSelectPlant={selectPlant} onSelectLineChart={selectPlantTypeForLineChart}/>
     </RightColumn>
   </Container>)
 }
