@@ -11,7 +11,7 @@ import plantBPng from '../../assets/images/plantB.webp';
 import plantCPng from '../../assets/images/plantC.jpeg'
 
 interface CircularProgressProps {
-  value: number,
+  value: number[],
   label: string,
   color: string,
 }
@@ -40,7 +40,7 @@ const CircularProgress = ({ value, label, color }: CircularProgressProps) => {
       }
     }
   },
-  colors: [color],
+  colors: [color, 'pink'],
   plotOptions: {
     radialBar: {
       hollow: {
@@ -48,6 +48,13 @@ const CircularProgress = ({ value, label, color }: CircularProgressProps) => {
         size: '60%',
       },
       dataLabels: {
+        total: {
+          show: true,
+          label: label,
+          formatter: function (w: any) {
+            return ''
+          }
+        },
         show: true,
         style: {
           fontSize: '8'
@@ -66,7 +73,7 @@ const CircularProgress = ({ value, label, color }: CircularProgressProps) => {
       }
     },
   },
-  labels: [label],
+  labels: ['Current', 'Standard'],
   
 }
 
@@ -74,7 +81,7 @@ const CircularProgress = ({ value, label, color }: CircularProgressProps) => {
     <ProgessChartWrapper className='chart-component-wrapper'>
        <Chart
           options={options}
-          series={[value]}
+          series={[...value]}
           type="radialBar"
           height="120"
         />
@@ -117,10 +124,9 @@ function PlantStatus({ activePlant }: PlantStatus) {
       </PlantInfo>
       <StyledImage src={getImageUrl(activePlant?.plantId)}></StyledImage>
       <CircularProgressSection className='circular-progress-section'>
-        <CircularProgress value={45} label="Temperate" color={colorSet[0]}/>
-        <CircularProgress value={70} label="Humidity" color={colorSet[1]}/>
-        <CircularProgress value={60} label="Light" color={colorSet[2]}/>
-        <CircularProgress value={30} label="Light" color={colorSet[2]}/>
+        <CircularProgress value={[45, 60]} label="Temperate" color={colorSet[0]}/>
+        <CircularProgress value={[70, 75]} label="Humidity" color={colorSet[1]}/>
+        <CircularProgress value={[60, 65]} label="Light" color={colorSet[2]}/>
       </CircularProgressSection>
     </Container>
   );

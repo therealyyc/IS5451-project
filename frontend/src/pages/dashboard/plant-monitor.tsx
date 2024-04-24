@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import styled from 'styled-components';
-import { Tag, Button, Row, Col } from 'antd';
+import { Tag, Button, Row, Col, Select } from 'antd';
 import { ExclamationCircleOutlined, CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import * as _ from 'lodash'
 import Chart from "react-apexcharts";
@@ -130,9 +130,19 @@ const LineChart = () => {
 
 
 function PlantMonitor({plants, onSelectPlant}: PlantMonitorPros) {
+
+  const typeOptions = [
+    { value: 'light', label: 'Light' },
+    { value: 'humid', label: 'Humid' },
+    { value: 'temperature', label: 'Temperature' },
+  ]
+
   return (
     <Container>
       <LineChartSection>
+        <div className='type-selector'>
+          <Select  className='trend-type-selector' value={typeOptions[0]} options={typeOptions}></Select>
+        </div>
         <LineChart/>
       </LineChartSection>
       <div className='card-wrapper'>
@@ -231,6 +241,18 @@ const PlantInfo = styled.div`
 
 const LineChartSection = styled.div`
   height: 50%;
+
+  position: relative;
+
+  .type-selector {
+    position: absolute;
+    z-index: 99999;
+    left: 60px;
+    top: -5px;
+    .trend-type-selector {
+      width: 120px;
+    }
+  }
 `;
 
 const LineChartWrapper = styled.div`
