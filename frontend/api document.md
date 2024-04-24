@@ -77,9 +77,9 @@ This document provides detailed information on the APIs available in the Plant M
 }
 ```
 
-### 4. Plant Environmental Data Chart
+### 4. Plant Environmental Line Chart
 
-**Endpoint:** `/api/plants/{plantId}/environmental-data`
+**Endpoint:** `/api/plants/{plantId}/environmental-data/line-chart`
 **Method:** `GET`
 **Description:** Retrieves historical data charts for the environmental conditions of a plant.
 **Parameters:**
@@ -101,5 +101,37 @@ This document provides detailed information on the APIs available in the Plant M
     "categories": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"]
   }
 }
+```
+
+### 5. Plant Environmental pie Chart
+
+**Endpoint:** `/api/plants/{plantId}/environmental-data/pie-chart`
+**Method:** `GET`
+**Description:** Retrieves historical data charts for the environmental conditions of a plant.
+**Parameters:**
+
+- `plantId` (integer): The ID of the plant.
+
+
+**Response Example:**
+
+```
+[
+  {
+    "type": "humidity",
+    "standardData": 27,
+    "currentData": 50,
+  },
+  {
+    "type": "light",
+    "standardData": 27,
+    "currentData": 50,
+  },
+  {
+    "type": "temperature",
+    "standardData": 27,
+    "currentData": 50,
+  }
+]
 ```
 
