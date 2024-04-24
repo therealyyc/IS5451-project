@@ -79,7 +79,7 @@ This document provides detailed information on the APIs available in the Plant M
 
 ### 4. Plant Environmental Line Chart
 
-**Endpoint:** `/api/plants/{plantId}/environmental-data/line-chart`
+**Endpoint:** `/api/plants/{plantId}/environmental-data/line-chart/{dataType}`
 **Method:** `GET`
 **Description:** Retrieves historical data charts for the environmental conditions of a plant.
 **Parameters:**
@@ -105,7 +105,7 @@ This document provides detailed information on the APIs available in the Plant M
 
 ### 5. Plant Environmental pie Chart
 
-**Endpoint:** `/api/plants/{plantId}/environmental-data/pie-chart`
+**Endpoint:** `/api/plants/{plantId}/environmental-data/pie-chart/{dataType}`
 **Method:** `GET`
 **Description:** Retrieves historical data charts for the environmental conditions of a plant.
 **Parameters:**
