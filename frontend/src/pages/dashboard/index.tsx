@@ -59,8 +59,8 @@ const Dashboard = () => {
         setLineChartData(linedata)
       }
       if (activePlant.plantId) {
-        refreshCurrentPlantStatus(); // Fetch immediately when the component mounts or plantId changes
-        intervalId = setInterval(refreshCurrentPlantStatus, 5000); // Poll every 5000 milliseconds (5 seconds)
+        refreshCurrentPlantStatus();
+        intervalId = setInterval(refreshCurrentPlantStatus, 10000); // Poll every 10000 milliseconds (10 seconds) set timeinterval
       }
 
       return () => {
