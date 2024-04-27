@@ -1,29 +1,16 @@
-CREATE TABLE Environment (
-    id INTEGER PRIMARY KEY,
-    humidity REAL,        
-    temperature REAL,      
-    pressure REAL,         
-    ph_value REAL,         
-    light_intensity REAL,  
-    timestamp DATETIME     
+CREATE TABLE Plants (
+    PlantID INTEGER PRIMARY KEY,
+    Image BLOB,
+    ConditionDescription TEXT
 );
 
-
-CREATE TABLE User (
-    id TEXT PRIMARY KEY,
-    'password' TEXT NOT NULL,
-    primer INTEGER DEFAULT 0
-)
-
-
-CREATE TABLE environment (
-    id INTEGER PRIMARY KEY,
-    devicename TEXT,
-    crowd INTEGER,
-    abright INTEGER,
-    atemp REAL,
-    ahum REAL,
-    timestamp DATETIME
+CREATE TABLE EnvironmentalFactors (
+    EnvironmentID INTEGER PRIMARY KEY,
+    PlantID INTEGER,
+    Temperature FLOAT,
+    Humidity FLOAT,
+    Pressure FLOAT,
+    Light FLOAT,
+    Timestamp DATETIME DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (PlantID) REFERENCES Plants(PlantID)
 );
-
-    tocloud INTEGER DEFAULT 0

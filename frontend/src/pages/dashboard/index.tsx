@@ -26,7 +26,6 @@ const Dashboard = () => {
   useEffect(() => {
     (async() => {
       if(activePlant){
-        // const liePlant = await getLineChart(activePlant.plantId)
         const piedata = await getPieChart(activePlant.plantId)
         setPieChartData(piedata)
       }

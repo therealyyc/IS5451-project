@@ -2,10 +2,11 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 from werkzeug.utils import secure_filename
-from data_operator import insert_env_data, user_login, user_register
+from data_operator import insert_environment_data, get_plant_env_data, get_plant_env_line_data, update_plant_condition, get_plant_condition
 import os
 from recognition import get_plant_condition
 from get_cluster import get_humidity_cluster, get_light_cluster
+from action2raspi import light_action, water_action
 
 app = Flask(__name__)
 
@@ -15,13 +16,19 @@ def hello_world():
 
 @app.route('/putNewData')
 def putEnvironmentData():
+   plantID = request.args.get('plantID')
    humidity = request.args.get('humidity')
    temperature = request.args.get('temperature')
    pressure = request.args.get('pressure')
-   ph = request.args.get('ph')
    light = request.args.get('light')
-   insert_env_data(humidity, temperature, pressure, ph, light)
-   return f"Environment Information: H:{humidity}, T:{temperature}, P:{pressure}, PH:{ph}, L:{light}", 200
+   timestamp = request.args.get('timestamp')
+   insert_environment_data(plantID, temperature, humidity, pressure, light, timestamp)
+   result = get_light_cluster(light)
+   if result == 'on':
+      light_action(0)
+   else:
+      light_action(1)
+   return f"Environment Information: H:{humidity}, T:{temperature}, P:{pressure}, L:{light}", 200
  
 @app.route('/uploadImage', methods=['POST'])
 def upload_file():
@@ -33,7 +40,9 @@ def upload_file():
    if file:
       filename = secure_filename(file.filename)
       file.save(os.path.join('data/image', filename))
-      return get_plant_condition(os.path.join('data/image', filename)), 200
+      result = get_plant_condition(os.path.join('data/image', filename))
+      update_plant_condition(result)
+      return result, 200
    
 
 @app.route('/getLightCondition')
@@ -47,43 +56,23 @@ def get_light_condition():
 def get_humidity_condition():
    humidity = request.args.get('humidity')
    result = get_humidity_cluster(humidity)
-   return result, 200
-
-@app.route('/user_login', methods=['POST'])
-def user_auth():
-    if request.is_json:
-        data = request.get_json()
-        username = data.get('username')
-        password = data.get('password')
-        return user_login(username, password)
-    else:
-        return 'No JSON received', 400
-
-
-@app.route('/user_register', methods=['POST'])
-def user_regis():
-    if request.is_json:
-        data = request.get_json()
-        username = data.get('username')
-        password = data.get('password')
-        return user_register(username, password)
-    else:
-        return 'No JSON received', 400
-     
+   return result, 200  
 
 @app.route('/api/plants/<plantID>/conditions')
 def get_plant_conditions(plantID):
+   response = get_plant_env_data(plantID)
    result = {
       "plantId": 1,
-      "humidity": 50,
-      "temperature": 22,
-      "lightLevel": 300,
-      "atmosphericPressure": 1013
-  }
+      "humidity": response[1],
+      "temperature": response[0],
+      "lightLevel": response[3],
+      "atmosphericPressure": response[2]
+   }
    return jsonify(result), 200
 
 @app.route('/api/plants')
 def get_all_plants():
+   # result = get_plant_condition(1)
    result = [
       {
          "plantId": 1,
@@ -104,48 +93,52 @@ def get_all_plants():
    return jsonify(result), 200
 
 
-# action 总共这三个值 water light heat
+# action 总共这三个值 water light
 # localhost:5010/api/plants/<plantId>/action?action=water
 @app.route('/api/plants/<plantId>/action/<action>')
 def take_action(plantId, action):
+   if action == 'light':
+      light_action(1)
+   if action == 'humidity':
+      water_action()
    result = action + " has been done..."
    return result, 200
-
-
 
 # 总共这三个值 dataType humidity temperature light
 #/api/plants/{plantId}/environmental-data/line-chart/{dataType}
 @app.route('/api/plants/<plantId>/environmental-data/line-chart/<dataType>')
 def get_chart_data(plantId, dataType):
+   response, cat = get_plant_env_line_data(plantId, dataType)
    result = {
       "value":
          [{
             "name": dataType,
-            "data": [20, 31, 15, 31, 69, 22, 39, 61, 28]
+            "data": response
          }],
-      "categories": ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+      "categories": cat,
 
    }
    return jsonify(result), 200
 
-#/api/plants/{plantId}/environmental-data/pie-chart/{dataType}
+#/api/plants/{plantId}/environmental-data/pie-chart
 @app.route('/api/plants/<plantId>/environmental-data/pie-chart')
 def get_pie_data(plantId):
+   response = get_plant_env_data(plantId)
    result = [
       {
          "type": "humidity",
          "standardData": 27,
-         "currentData": 50,
+         "currentData": response[1],
       },
       {
          "type": "light",
          "standardData": 27,
-         "currentData": 50,
+         "currentData": response[3],
       },
       {
          "type": "temperature",
          "standardData": 27,
-         "currentData": 50,
+         "currentData": response[0],
       }
    ]
    return jsonify(result), 200

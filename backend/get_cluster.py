@@ -3,7 +3,7 @@ from joblib import load
 
 def get_light_cluster(light):
     model = load('cluster/plantcluster_light.joblib')
-    cluster = model.predict(light)
+    cluster = model.predict([[light]])
     if cluster == 0:
         return "on"
     else:
@@ -12,7 +12,7 @@ def get_light_cluster(light):
 
 def get_humidity_cluster(humidity):
     model = load('cluster/plantcluster_humidity.joblib')
-    cluster = model.predict(humidity)
+    cluster = model.predict([[humidity]])
     if cluster == 0:
         return "on"
     else:
