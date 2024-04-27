@@ -115,6 +115,7 @@ const triggerAction = async (label: string) => {
 interface PlantStatus {
   activePlant: Plant | null,
   pieChartData: PieData[],
+  imageData: any,
 }
 
 export interface PieData {
@@ -123,7 +124,7 @@ export interface PieData {
   currentData: number,
 }
 
-function PlantStatus({ activePlant, pieChartData }: PlantStatus) {
+function PlantStatus({ activePlant, pieChartData, imageData }: PlantStatus) {
 
   const colorSet = ['#3498db', '#f1c40f', '#2ecc71']
 
@@ -147,7 +148,7 @@ function PlantStatus({ activePlant, pieChartData }: PlantStatus) {
         <div className='plant-name'>{activePlant?.plantName}</div>
         {getTagByStatus(activePlant?.plantStatus)}
       </PlantInfo>
-      <StyledImage src={getImageUrl(activePlant?.plantId)}></StyledImage>
+      <StyledImage src={imageData}></StyledImage>
       <CircularProgressSection className='circular-progress-section'>
         {
           pieChartData.map(data => <CircularProgress key={data.type} activePlant={activePlant} value={[data.currentData, data.standardData]} label={`${_.capitalize(data.type)}`} color={colorSet[0]}/>)

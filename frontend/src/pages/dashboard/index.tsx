@@ -2,7 +2,7 @@ import styled from "styled-components"
 import { useState, useEffect } from 'react'
 import PlantStatus, { PieData } from "./plant-status"
 import PlantMonitor from "./plant-monitor"
-import { getPLants, getPlantCondition, getLineChart, getPieChart } from "../../apis/plant"
+import { getPLants, getPlantCondition, getLineChart, getPieChart, getImagePicture } from "../../apis/plant"
 import { Plant, PlantLineChart, PlantType } from "../../types/plant"
 
 
@@ -14,6 +14,7 @@ const Dashboard = () => {
     "categories": ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
  })
   const [selectedLineCategory, setSelectedLineCategory] = useState<PlantType>(PlantType.LIGHT)
+  const [imageData, setImageData] = useState('');
 
   useEffect(() => {
     (async() => {
@@ -27,7 +28,10 @@ const Dashboard = () => {
     (async() => {
       if(activePlant){
         const piedata = await getPieChart(activePlant.plantId)
+        const activeImage = await getImagePicture()
+        const base64Image = `data:image/jpeg;base64,${activeImage.image}`;
         setPieChartData(piedata)
+        setImageData(base64Image)
       }
     })()
   }, [activePlant])
@@ -52,7 +56,7 @@ const Dashboard = () => {
   
   return ( <Container>
     <LeftColumn>
-      <PlantStatus activePlant={activePlant} pieChartData={pieChartData}/>
+      <PlantStatus imageData={imageData} activePlant={activePlant} pieChartData={pieChartData}/>
     </LeftColumn>
     <RightColumn>
       <PlantMonitor linedata={lineChartData} plants={plants} selectedPlantType={selectedLineCategory} onSelectPlant={selectPlant} onSelectLineChart={selectPlantTypeForLineChart}/>

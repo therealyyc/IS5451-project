@@ -42,3 +42,10 @@ export const getPieChart = async (plantId: number): Promise<PieData[]> => {
     method: 'GET'
   })
 }
+
+export const getImagePicture = async (): Promise<any> => {
+  return fetch({
+    url: `/api/plants/getImage`,
+    method: 'GET'
+  })
+}
