@@ -7,6 +7,9 @@ import os
 from recognition import get_plant_condition
 from get_cluster import get_humidity_cluster, get_light_cluster
 from action2raspi import light_action, water_action
+from PIL import Image
+import base64
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -142,6 +145,22 @@ def get_pie_data(plantId):
       }
    ]
    return jsonify(result), 200
+
+
+
+@app.route('/api/plants/getImage')
+def get_image():
+   image_path = 'data/image/photo_plant.jpg'
+
+   image = Image.open(image_path)
+
+   buffered = BytesIO()
+   image.save(buffered, format="JPEG")
+
+   img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+   result = {'image': img_str}
+   return jsonify(result), 200
+   
    
 
 if __name__ == '__main__':
