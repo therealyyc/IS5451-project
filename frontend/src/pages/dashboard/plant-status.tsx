@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import Chart from "react-apexcharts";
-import { ToolFilled } from '@ant-design/icons';
+import { ToolFilled, SyncOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import _ from 'lodash'
 
@@ -116,6 +116,7 @@ interface PlantStatus {
   activePlant: Plant | null,
   pieChartData: PieData[],
   imageData: any,
+  onRefreshCurrentPlantStatus: () => void,
 }
 
 export interface PieData {
@@ -124,7 +125,7 @@ export interface PieData {
   currentData: number,
 }
 
-function PlantStatus({ activePlant, pieChartData, imageData }: PlantStatus) {
+function PlantStatus({ activePlant, pieChartData, imageData, onRefreshCurrentPlantStatus }: PlantStatus) {
 
   const colorSet = ['#3498db', '#f1c40f', '#2ecc71']
 
@@ -146,7 +147,8 @@ function PlantStatus({ activePlant, pieChartData, imageData }: PlantStatus) {
     <Container>
       <PlantInfo>
         <div className='plant-name'>{activePlant?.plantName}</div>
-        {getTagByStatus(activePlant?.plantStatus)}
+        <div><Tooltip title="Refresh Data"><SyncOutlined className='refresh-icon' spin onClick={onRefreshCurrentPlantStatus}/></Tooltip>
+        {getTagByStatus(activePlant?.plantStatus)}</div>
       </PlantInfo>
       <StyledImage src={imageData}></StyledImage>
       <CircularProgressSection className='circular-progress-section'>
@@ -190,6 +192,10 @@ const PlantInfo = styled.div`
   height: 30px;
   justify-content: space-between;
   margin-bottom: 10px;
+
+  .refresh-icon {
+    margin-right: 20px;
+  }
 
   .plant-name {
     font-size: 16px;

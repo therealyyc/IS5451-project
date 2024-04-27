@@ -24,26 +24,52 @@ const Dashboard = () => {
     })()
   }, [])
 
+  // useEffect(() => {
+  //   (async() => {
+  //     if(activePlant){
+  //       const piedata = await getPieChart(activePlant.plantId)
+  //       const activeImage = await getImagePicture()
+  //       const base64Image = `data:image/jpeg;base64,${activeImage.image}`;
+  //       setPieChartData(piedata)
+  //       setImageData(base64Image)
+  //     }
+  //   })()
+  // }, [activePlant])
+
+  // useEffect(() => {
+  //   (async() => {
+  //     if(activePlant){
+  //       const linedata = await getLineChart(activePlant.plantId, selectedLineCategory)
+  //       setLineChartData(linedata)
+  //     }
+  //   })()
+  // }, [activePlant, selectedLineCategory])
+
   useEffect(() => {
-    (async() => {
-      if(activePlant){
+    if(activePlant){
+      let intervalId: any;
+      if(!activePlant.plantId) return
+      const refreshCurrentPlantStatus = async () => {
         const piedata = await getPieChart(activePlant.plantId)
+        const linedata = await getLineChart(activePlant.plantId, selectedLineCategory)
         const activeImage = await getImagePicture()
         const base64Image = `data:image/jpeg;base64,${activeImage.image}`;
         setPieChartData(piedata)
         setImageData(base64Image)
-      }
-    })()
-  }, [activePlant])
-
-  useEffect(() => {
-    (async() => {
-      if(activePlant){
-        const linedata = await getLineChart(activePlant.plantId, selectedLineCategory)
         setLineChartData(linedata)
       }
-    })()
-  }, [activePlant, selectedLineCategory])
+      if (activePlant.plantId) {
+        refreshCurrentPlantStatus(); // Fetch immediately when the component mounts or plantId changes
+        intervalId = setInterval(refreshCurrentPlantStatus, 5000); // Poll every 5000 milliseconds (5 seconds)
+      }
+
+      return () => {
+        if (intervalId) {
+          clearInterval(intervalId); // Clear interval on component unmount or plantId change
+        }
+      };
+    }
+  }, [activePlant, selectedLineCategory]); 
   
 
   const selectPlant = (plant: Plant) => {
@@ -53,10 +79,23 @@ const Dashboard = () => {
   const selectPlantTypeForLineChart = (plantType: PlantType) => {
     setSelectedLineCategory(plantType)
   }
+
+  const refreshCurrentPlantStatus = async () => {
+    if (!activePlant) return
+    const piedata = await getPieChart(activePlant.plantId)
+    const linedata = await getLineChart(activePlant.plantId, selectedLineCategory)
+    const activeImage = await getImagePicture()
+    const base64Image = `data:image/jpeg;base64,${activeImage.image}`;
+    setPieChartData(piedata)
+    setImageData(base64Image)
+    setLineChartData(linedata)
+  }
+
+  
   
   return ( <Container>
     <LeftColumn>
-      <PlantStatus imageData={imageData} activePlant={activePlant} pieChartData={pieChartData}/>
+      <PlantStatus imageData={imageData} activePlant={activePlant} pieChartData={pieChartData} onRefreshCurrentPlantStatus={refreshCurrentPlantStatus}/>
     </LeftColumn>
     <RightColumn>
       <PlantMonitor linedata={lineChartData} plants={plants} selectedPlantType={selectedLineCategory} onSelectPlant={selectPlant} onSelectLineChart={selectPlantTypeForLineChart}/>
